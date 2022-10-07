@@ -11,3 +11,5 @@ java -cp 패키지 전까지의 경로 패키지이름과 클래스이름
 ![image](https://user-images.githubusercontent.com/52357235/194520804-5606e3cf-3d96-405a-8e82-fdcb8524557f.png)
 
 위와 같이 해주면 실행이 가능하다.
+
+[참고](https://blog.naver.com/PostView.nhn?blogId=ac7979&logNo=140117222243)
