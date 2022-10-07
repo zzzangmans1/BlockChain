@@ -31,3 +31,17 @@ java -cp 패키지 전까지의 경로 패키지이름과 클래스이름
 위의 옵션방법에서 Use system encoding (x-windows-949) 옵션을 선택하면 된다.
 
 ![image](https://user-images.githubusercontent.com/52357235/194553508-b72aee62-e2f7-491c-8ba3-366c5641e7ce.png)
+
+## 3
+
+![image](https://user-images.githubusercontent.com/52357235/194557101-373491a7-d706-4341-a188-07f75c8853d0.png)
+
+위와 같이 오류가 뜨면 중복된 주소가 있다고 합니다.
+
+![image](https://user-images.githubusercontent.com/52357235/194557393-b3efacf4-1adf-4812-9e7d-23b17d5d3e91.png)
+
+위와 같이 cmd 에 명령어를 입력해서 중복된 주소를 꺼줍시다.
+
+![image](https://user-images.githubusercontent.com/52357235/194557667-c2619588-5777-42e1-bb02-c9fb1778c607.png)
+
+위와 같이 PID를 찾아 종료해줍시다.
