@@ -1,4 +1,3 @@
-``` java
 import java.io.*;
 import java.net.*;	// socket 클래스
 import java.util.Scanner;
@@ -56,5 +55,3 @@ public class server {
 		
 	}
 }
-
-```
