@@ -29,7 +29,7 @@ public class Block {
     public void setNonce(int nonce) {
         this.nonce = nonce;
     }
-    public String getTransaction() {
+    public String getTransaction() throws NoSuchAlgorithmException {
         String transactionInformations = "";
         
         for(int i=0;i<transactionList.size();i++) {
@@ -38,11 +38,8 @@ public class Block {
         
         return transactionInformations;
     }
-    public void addTransaction(Transaction transaction) {
-        transactionList.add(transaction);
-    }
     
-    public Block(int blockID, String previousBlockHash, int nonce, ArrayList transactionList) {
+    public Block(int blockID, String previousBlockHash, int nonce, ArrayList<Transaction> transactionList) {
         this.blockID = blockID;
         this.previousBlockHash = previousBlockHash;
         this.nonce = nonce;
@@ -54,6 +51,16 @@ public class Block {
         return s.encrypt(nonce + getTransaction() + previousBlockHash);
     }
     
+    // 정상적인 트랜잭션만 블록에 추가
+    public void addTransaction(Transaction transaction) throws Exception {
+    	Verification v = new Verification();
+        if(v.verification(transaction.getSignature() , transaction.getSender())) {
+            System.out.println("정상적인 트랜잭션을 발견했습니다.");
+            transactionList.add(transaction);
+        } else {
+            System.out.println("트랜잭션이 바르게 인증되지 않았습니다.");
+        }
+    }
     public void showInformation() throws NoSuchAlgorithmException {    
         System.out.println("---------------------------");
         System.out.println("블록 번호: " + getBlockID());
