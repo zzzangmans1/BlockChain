@@ -2,10 +2,12 @@ package blockchain.midterm;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public class sha256 {
+public class Sha256 {
 	
-	protected String encrypt(String plaintext) 
+	protected  String encrypt(String plaintext) 
 	throws NoSuchAlgorithmException{
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		md.update(plaintext.getBytes());
@@ -13,11 +15,18 @@ public class sha256 {
 		return bytesToHex(md.digest());
 	}
 	
-	private String bytesToHex(byte[] bytes) {
+	private  String bytesToHex(byte[] bytes) {
 		StringBuilder sb = new StringBuilder();
 		
 		for(byte b : bytes) sb.append(String.format("%02X", b));
 		
 		return sb.toString();
+	}
+	
+	public String getDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date time = new Date();
+		String now = sdf.format(time);
+		return now;
 	}
 }
