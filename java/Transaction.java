@@ -63,12 +63,12 @@ public class Transaction {
 	// 서명 값을 포함한 단순 트랜잭션 정보를 반환
 	public String getInformation() throws NoSuchAlgorithmException {
 		Sha256 s = new Sha256();
-		return "<" + signature + ">\n" + "SEND" +  s.encrypt(sender.toString()) + " -> " + "RECEIVE"+s.encrypt(receiver.toString()) + ", DATA : " +amount + "\t" + timestamp;
+		return "<" + signature + ">\n" + "SEND " +  s.encrypt(sender.toString()) + " -> " + "RECEIVE "+s.encrypt(receiver.toString()) + ", DATA : " +amount + "\t" + timestamp;
 	}
 	
 	// 서명 값을 제외한 단순 트랜젝션 정보를 반환
 	public String getData() throws NoSuchAlgorithmException {
 		Sha256 s = new Sha256();
-		return "SEND" + s.encrypt(sender.toString()) + " -> " + "RECEIVE"+ s.encrypt(receiver.toString()) + ", DATA : " +amount + "\t" + timestamp;
+		return "SEND " + s.encrypt(sender.toString()) + " -> " + "RECEIVE "+ s.encrypt(receiver.toString()) + ", DATA : " +amount + "\t" + timestamp;
 	}
 }
