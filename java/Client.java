@@ -7,11 +7,13 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Scanner;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Client {
+	
+	public static Sha256 s = new Sha256();
+    public static Rsa rsa = new Rsa();
 	/**
 	 * 서버와 키교환 하는 메소드
 	 * @return PublicKey
@@ -59,15 +61,39 @@ public class Client {
 	                System.out.println(e.getMessage());
 	            }
 	        }
-	        Rsa rsa = new Rsa();
 	        System.out.println("-------------------------------------------------");
 	        return rsa.readPublicKeyFromPemFile(Keyname);
 	    }
-	/**
+	 /**
+	  * 트랜잭션 보내는 클라이언트
+	  */
+	 public static void dataSendClient() {
+		 	Socket socket = null;
+		 	BufferedWriter bw = null;
+		 	
+			try {
+				socket = new Socket("localhost", 9999);
+				
+				bw = new BufferedWriter( new OutputStreamWriter( socket.getOutputStream() ) );
+				
+				bw.write("데이터 \n");
+				bw.flush();
+				
+				System.out.println( "Connection success" );
+			
+			} catch (UnknownHostException e) {
+				System.out.println( "[에러] : " + e.getMessage() );
+			} catch (IOException e) {
+				System.out.println( "[에러] : " + e.getMessage() );
+			} finally {
+				if ( socket != null ) try { socket.close(); } catch(IOException e) {}
+			}
+	 }
+	 /**
 	 * 지갑 생성하는 메소드
 	 * @throws Exception
 	 */
-	public static void CreateWallet(Wallet wallet) throws Exception {
+ 	public static void CreateWallet(Wallet wallet) throws Exception {
 		System.out.println("----------------ClientWalletCreate--------------\n");
 		Rsa.genRSAKeyPair("ClientPrivateKey.pem", "ClientPublicKey.pem");			// 키생성 후 파일에 저장
 		wallet.setFromFile("ClientPrivateKey.pem", "ClientPublicKey.pem");
@@ -78,50 +104,22 @@ public class Client {
 
     	Security.addProvider(new BouncyCastleProvider());	
     	Wallet wallet = new Wallet();
-		CreateWallet(wallet);
 		PublicKey ServerPublicKey = null;
-		ServerPublicKey = keyExchangeclient();
-		
-		System.out.println("Client입니다. 서버에게 받은 키 :" +ServerPublicKey);
-		
-		BufferedReader in = null;
-		BufferedWriter out = null;
-		
-		Socket sock = null;
-		Scanner scanner = new Scanner(System.in);
-	
-		String outputMessage = "";
-		String inputMessage	= "";
-		
-		try {
-			sock = new Socket("0.0.0.0", 9999);
-			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
-							
-			while(true) {
-				System.out.print("Client>>"); 			// 프롬포트
-				outputMessage = scanner.nextLine();		// 서버에게 보낼 메시지 입력
-				if(outputMessage.equalsIgnoreCase("exit")) {
-					out.write(outputMessage + "\n");
-					out.flush();
-					System.out.println("종료되었습니다");
-					break;								// 서버에게 exit 보내면 실행 종료
-				}
-				out.write(outputMessage +"\n");
-				out.flush();
-				inputMessage = in.readLine();			// 서버로부터 한 행 수신
-				System.out.println("서버 : "+inputMessage);
-			}
-		} catch (Exception e) {			
-			System.out.println("에러" + e.getMessage());
-		} finally {
-			try {
-				scanner.close();
-				if(sock != null) sock.close();			// 클라이언트 소켓 닫기
-			} catch (Exception e) {
-				System.out.println("서버와 채팅 중 오류가 발생했습니다.");
-			}
+
+		if(s.isExists("ClientPublicKey.pem") == false)
+		{
+			System.out.println("키교환을 하겠습니다.");
+			CreateWallet(wallet);
+			ServerPublicKey = keyExchangeclient();
+			System.out.println("Client입니다. 서버에게 받은 키 :" +ServerPublicKey);
 		}
+		else {
+			System.out.println("키교환을 이미 하였습니다.");
+			wallet.setFromFile("ClientPrivateKey.pem", "ClientPublicKey.pem");
+			ServerPublicKey = rsa.readPublicKeyFromPemFile("ServerPublicKey.pem");
+		}
+		Thread.sleep(5000);
+		dataSendClient();
 	}
 
 }
