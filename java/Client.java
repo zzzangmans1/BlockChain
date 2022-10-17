@@ -32,6 +32,7 @@ public class Client {
 	        PrintWriter mOut = null;
 	        
 	        String Keyname = "";
+	        
 	        try {
 	            // 서버에 요청 보내기
 	            mSocket = new Socket("0.0.0.0", 9090);
