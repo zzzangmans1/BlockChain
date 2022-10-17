@@ -45,3 +45,18 @@ java -cp 패키지 전까지의 경로 패키지이름과 클래스이름
 ![image](https://user-images.githubusercontent.com/52357235/194557667-c2619588-5777-42e1-bb02-c9fb1778c607.png)
 
 위와 같이 PID를 찾아 종료해줍시다.
+
+# EXECUTE 
+
+1. Server 파일을 실행합니다.
+
+![image](https://user-images.githubusercontent.com/52357235/196185718-1d3e32a0-0fa6-4a88-a025-4105f500f535.png)
+
+2. Client 파일을 실행합니다.
+
+![image](https://user-images.githubusercontent.com/52357235/196185854-01e867dd-96b8-4af1-80ce-c1ee424c2011.png)
+
+클라이언트 파일을 실행할 떄 마다 블록이 연결되어 추가됩니다.
+
+![image](https://user-images.githubusercontent.com/52357235/196186119-d429c91c-406b-4b19-80fe-46941e2a990a.png)
+
