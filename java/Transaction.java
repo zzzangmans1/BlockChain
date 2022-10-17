@@ -5,8 +5,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -18,7 +16,7 @@ public class Transaction {
 	String signature;
 	PublicKey sender;
 	PublicKey receiver;
-	double amount;
+	String amount;
 	Timestamp timestamp;
 	
 	public String getSignature() {
@@ -39,10 +37,10 @@ public class Transaction {
 	public void setReceiver(PublicKey receiver) {
 		this.receiver = receiver;
 	}
-	public double getAmount() {
+	public String getAmount() {
 		return amount;
 	}
-	public void setAmount(double amount) {
+	public void setAmount(String amount) {
 		this.amount = amount;
 	}
 	public Timestamp getTimestamp() {
@@ -52,7 +50,7 @@ public class Transaction {
 		this.timestamp = timestamp;
 	}
 	
-	public Transaction(Wallet wallet, PublicKey recevier, double amount, String timestamp) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException
+	public Transaction(Wallet wallet, PublicKey recevier, String amount, String timestamp) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException
 	{
 		
 		this.sender = wallet.getPublicKey();
@@ -62,17 +60,15 @@ public class Transaction {
 		this.signature = wallet.sign(getData());
 	}
 	
-	
-	
 	// 서명 값을 포함한 단순 트랜잭션 정보를 반환
 	public String getInformation() throws NoSuchAlgorithmException {
 		Sha256 s = new Sha256();
-		return "<" + signature + ">\n" + s.encrypt(sender.toString()) + " -> " + s.encrypt(receiver.toString()) + " : " +amount + " 개 " + timestamp;
+		return "<" + signature + ">\n" + "SEND" +  s.encrypt(sender.toString()) + " -> " + "RECEIVE"+s.encrypt(receiver.toString()) + ", DATA : " +amount + "\t" + timestamp;
 	}
 	
 	// 서명 값을 제외한 단순 트랜젝션 정보를 반환
 	public String getData() throws NoSuchAlgorithmException {
 		Sha256 s = new Sha256();
-		return s.encrypt(sender.toString()) + " -> " + s.encrypt(receiver.toString()) + " : " +amount + " 개 " + timestamp;
+		return "SEND" + s.encrypt(sender.toString()) + " -> " + "RECEIVE"+ s.encrypt(receiver.toString()) + ", DATA : " +amount + "\t" + timestamp;
 	}
 }
