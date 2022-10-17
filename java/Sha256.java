@@ -1,5 +1,6 @@
 package blockchain.midterm;
 
+import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -28,5 +29,14 @@ public class Sha256 {
 		Date time = new Date();
 		String now = sdf.format(time);
 		return now;
+	}
+	
+	public static boolean isExists(String filename) {
+		// Create a file object
+				File file = new File(filename);
+				
+				// 1. check if the file exists or not
+				boolean isExists = file.exists();
+				return isExists;
 	}
 }
