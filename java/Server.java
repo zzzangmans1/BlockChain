@@ -2,28 +2,23 @@ package blockchain.midterm;
 
 import java.io.*;
 import java.net.*;	// socket 클래스
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Scanner;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
 
 public class Server {
+
+	public static Block[] block = new Block[20];
+	public static Transaction[] t = new Transaction[20];
+	public static Sha256 s = new Sha256();
+	public static Rsa rsa = new Rsa();
 	/**
 	 * 클라이언트와 키교환 하는 메소드
 	 * @return PublicKey
@@ -85,6 +80,53 @@ public class Server {
         System.out.println("------------------------------------------------------");
         return rsa.readPublicKeyFromPemFile(keyname);
     }
+	/** 
+	 * 트랜잭션 받을 서버
+	 * @throws Exception 
+	 */
+	public static void dataReceiveServer(Wallet w, PublicKey key) throws Exception {
+		ServerSocket serverSocket = null;
+		Socket socket = null;
+		BufferedReader br = null;
+		
+		int transNum = 0;
+		String prevH = null;
+		int blockNum = 0;
+		
+		try {
+			serverSocket = new ServerSocket( 9999 );
+			
+			//항시 대기 서버
+			while(true) {
+				//CreateBlock(blockNum, prevH, new ArrayList());
+				try {
+					System.out.println( serverSocket.getInetAddress() + ":" + serverSocket.getLocalPort() +"\tData Receive Server Ready" );
+					socket = serverSocket.accept();
+					System.out.println( socket.getLocalAddress() + ":" + socket.getLocalPort() + "\tClient connect");
+					br = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
+					String data = br.readLine();
+					System.out.println( "data : " + data );
+					
+					block[blockNum] = new Block(blockNum, prevH, 0, new ArrayList());
+					block[blockNum].mine();
+					t[transNum] = new Transaction(w, key, data, s.getDate());
+					block[blockNum].addTransaction(t[transNum++]);
+					block[blockNum].showInformation();
+					prevH = block[blockNum++].getBlockHash();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if ( socket != null ) try { socket.close(); } catch(IOException e) {}
+				}
+			}
+			
+		} catch (IOException e) {
+			System.out.println( "[에러] : " + e.getMessage() );
+		} finally {
+			if ( serverSocket != null ) try { serverSocket.close(); } catch(IOException e) {}
+		}
+	}
 	/**
 	 * 지갑 생성하는 메소드
 	 * @throws Exception 
@@ -92,90 +134,29 @@ public class Server {
 	public static void CreateWallet(Wallet wallet) throws Exception
 	{
 		System.out.println("----------------ServerWalletCreate--------------\n");
-		Rsa.genRSAKeyPair("ServerPrivateKey.pem", "ServerPublicKey.pem");		// 키생성 후 파일에 저장
+		rsa.genRSAKeyPair("ServerPrivateKey.pem", "ServerPublicKey.pem");		// 키생성 후 파일에 저장
 		wallet.setFromFile("ServerPrivateKey.pem", "ServerPublicKey.pem");		// 키파일 읽어와 지갑에 저장
 		System.out.println("------------------------------------------------\n");
 	}
 	
-	/**
-	 * 트랜스액션 생성하는 메소드
-	 * @param sender
-	 * @param publicKey
-	 * @param data
-	 * @throws InvalidKeyException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws BadPaddingException
-	 * @throws IllegalBlockSizeException
-	 * @throws NoSuchProviderException
-	 */
-	public static void CreateTransaction(Wallet sender, PublicKey publicKey, String data, Transaction transaction) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException {
-		Sha256 util = new Sha256();
-		transaction = new Transaction(sender, publicKey, data, util.getDate());
-	}
-	
-	public static void CreateBlock(int blockNum, String prevBlockHash, Transaction transaction) throws Exception {
-		 Block block = new Block(blockNum, prevBlockHash, 0, new ArrayList());
-		 block.mine();
-		 block.addTransaction(transaction);
-		 block.showInformation(); 
-	}
-	
 	public static void main(String[] args) throws Exception {
 
-    	Security.addProvider(new BouncyCastleProvider());	
-		Wallet wallet = new Wallet();
-		CreateWallet(wallet);
 		PublicKey ClientpublicKey = null;
-		ClientpublicKey = keyExchangeServer();
+		Wallet wallet = new Wallet();
 		
-		System.out.println("서버입니다. 클라이언트에게 받은 키 : " + ClientpublicKey);
-		
-		ServerSocket ss = null;		
-		Socket sock = null;
-		
-		BufferedReader in = null;							// 데이터 주고 받을 입출력 스트림 생성
-		BufferedWriter out = null;
-		
-		String inputMessage = "";
-		String outputMessage = ""; 
-		
-		Scanner scanner = new Scanner(System.in);			// 키보드에서 읽을 scanner 객체 생성
-		
-		try {												// try catch 는 ServerSocket 오류 때문에 
-			ss = new ServerSocket(9999); 					// 서버 소켓 포트 9999번 생성
-			
-			
-			System.out.println("연결을 기다리고 있습니다.");	
-			
-			sock = ss.accept();								// 클라이언트로부터 접속 대기
-			System.out.println("연결되었습니다.");
-						
-			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));		// accept() 메소드로부터 얻은 socket 객체의 getInputStream, getOutputStream 메소드를 이용하여 얻어낸다.
-			out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
-						
-			while(true) {
-				inputMessage = in.readLine();				// 클라이언트로부터 한 행 읽기
-				System.out.println(sock.getInetAddress() + ":" + sock.getLocalPort() + "에서 연결되었습니다.");
-				if(inputMessage.equalsIgnoreCase("exit")) {
-					System.out.println(ss.getInetAddress() +":"+ ss.getLocalPort() +"에서 클라이언트에서 종료하였습니다");
-					break;
-				}
-				System.out.println("클라이언트: " + inputMessage);
-				System.out.print("Server>>");						
-				outputMessage = scanner.nextLine();			
-				out.write(outputMessage + "\n");			// 키보드에서 읽은 문자열 전송
-				out.flush();								// out의 스트림 버퍼에 있는 모든 문자열 전송
-			}
-		} catch (IOException e) {
-			System.out.println (e.toString());
-		} finally {
-			try {
-				sock.close();								// 통신용 소켓 닫기
-				ss.close();									// 서버 소켓 닫기
-			} catch(IOException e) {
-				System.out.println("통신중 오류가 발생했습니다");
-			}
-		}
+    	Security.addProvider(new BouncyCastleProvider());	
+    	if(s.isExists("ClientPublicKey.pem") == false)								// 키교환을 받았었는지
+    	{
+    		System.out.println("키교환을 하겠습니다.");
+    		CreateWallet(wallet);
+    		ClientpublicKey = keyExchangeServer();
+    		System.out.println("서버입니다. 클라이언트에게 받은 키 : " + ClientpublicKey);
+    	}
+    	else {
+    		System.out.println("키교환을 이미 하였습니다.");
+    		wallet.setFromFile("ServerPrivateKey.pem", "ServerPublicKey.pem");		// 키파일 읽어와 지갑에 저장
+    		ClientpublicKey = rsa.readPublicKeyFromPemFile("ClientPublicKey.pem");	
+    	}
+		dataReceiveServer(wallet, ClientpublicKey);
 	}
 }
