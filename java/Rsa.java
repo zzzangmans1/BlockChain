@@ -1,8 +1,6 @@
 package blockchain.midterm;
 
 import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -44,29 +42,9 @@ public class Rsa {
         
         return keyPair;
     }
- 
-    /**
-     * Public Key로 RSA 암호화를 수행합니다.
-     * @param plainText 암호화할 평문입니다.
-     * @param publicKey 공개키 입니다.
-     * @return
      
-    public static String encryptRSA(String plainText, PublicKey publicKey)
-           throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-                  BadPaddingException, IllegalBlockSizeException {
-
-        Cipher cipher = Cipher.getInstance("RSA");							// Chipher 객체를 RSA로 인스턴스화
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);						// ENCRYPT_MODE: cipher 객체를 암호화 모드로 초기화하고 공개키로 암호화.
-        byte[] bytePlain = cipher.doFinal(plainText.getBytes());			// RSA 암호화
-        String encrypted = Base64.getEncoder().encodeToString(bytePlain);	// base64로 바이트 배열을 스트링 배열로 암호화해준다.
-        
-        return encrypted;
-    }
-     * @throws NoSuchProviderException 
-    */
-    
  // 공개키, 개인키로 암호화 가능
-    public static String encryptRSA(String plainText, Key Key)
+    public String encryptRSA(String plainText, Key Key)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
                    BadPaddingException, IllegalBlockSizeException, NoSuchProviderException {
 
@@ -79,7 +57,7 @@ public class Rsa {
      }
     
  	// 공개키, 개인키로 복호화 가능
-    public static String decryptRSA(String encrypted, Key Key)
+    public String decryptRSA(String encrypted, Key Key)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException, NoSuchProviderException {
 
@@ -90,28 +68,6 @@ public class Rsa {
          
          return decrypted;
      }
-    
-    /**
-     * Private Key로 RAS 복호화를 수행합니다.
-     *
-     * @param encrypted 암호화된 이진데이터를 base64 인코딩한 문자열 입니다.
-     * @param privateKey 복호화를 위한 개인키 입니다.
-     * @return
-     * @throws Exception
-     
-    public static String decryptRSA(String encrypted, PrivateKey privateKey)
-           throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-           BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
-
-        Cipher cipher = Cipher.getInstance("RSA");									// Chipher 객체를 RSA로 인스턴스화
-        byte[] byteEncrypted = Base64.getDecoder().decode(encrypted.getBytes());	// base64로 스트링 배열로 바이트배열로 복호화해준다.
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);								// DECRYPT_MODE : cipher 객체를 복호화 모드로 초기화하고, 개인키로 복호화하겠다.
-        byte[] bytePlain = cipher.doFinal(byteEncrypted);							// RSA 복호화
-        String decrypted = new String(bytePlain, "utf-8");							// 바이트 배열을 String 배열로 변경
-        
-        return decrypted;
-    }
-*/
    
     // Pem 오브젝트 세팅하고 파일로 저장
     private static void writePemFile(Key key, String description, String filename) 
@@ -123,7 +79,7 @@ public class Rsa {
     }
     
     // Pem 파일 읽고 문자열 반환
-    private static String readPemFile(String filename)
+    public String readPemFile(String filename)
     		throws FileNotFoundException, IOException {
     	String pem = "";
     	BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -136,18 +92,17 @@ public class Rsa {
     }
     
  // 문자열 형태의 인증서에서 개인키를 추출하는 함수
-    public static PrivateKey readPrivateKeyFromPemFile(String privateKeyName) 
+    public PrivateKey readPrivateKeyFromPemFile(String privateKeyName) 
             throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException, NoSuchProviderException{
         
         String data = readPemFile(privateKeyName); 
         System.out.println("RSA 개인키를 " + privateKeyName + "로부터 불러왔습니다.");
-        System.out.println(data);
+        //System.out.println(data);
         
         // 불필요한 설명 구문 제거
         data = data.replaceAll("-----BEGIN RSA PRIVATE KEY-----", "");
         data = data.replaceAll("-----END RSA PRIVATE KEY-----", "");
         data = data.replaceAll("\n", "");
-        //System.out.println(data);
 
         // PEM 파일은 Base64로 인코딩 되어있으므로 디코딩
         byte[] decoded = Base64.getDecoder().decode(data);
@@ -158,18 +113,17 @@ public class Rsa {
     }
     
     // 문자열 형태의 인증서에서 공키를 추출하는 함수
-    public static PublicKey readPublicKeyFromPemFile(String publicKeyName) 
+    public PublicKey readPublicKeyFromPemFile(String publicKeyName) 
             throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException, NoSuchProviderException{
         
         String data = readPemFile(publicKeyName); 
         System.out.println("RSA 공개키를 " + publicKeyName + "로부터 불러왔습니다.");
-        System.out.println(data);
+        //System.out.println(data);
         
         // 불필요한 설명 구문 제거
         data = data.replaceAll("-----BEGIN RSA PUBLIC KEY-----", "");
         data = data.replaceAll("-----END RSA PUBLIC KEY-----", "");
         data = data.replaceAll("\n", "");							// 파일에 저장될 때 띄어쓰기가 있는데 그게 있으면 base64 암복호화가 안돼 지워준다.
-        
         
         // PEM 파일은 Base64로 인코딩 되어있으므로 디코딩
         byte[] decoded = Base64.getDecoder().decode(data);
@@ -179,4 +133,3 @@ public class Rsa {
         return publicKey;
     }
 }
-
