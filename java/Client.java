@@ -2,11 +2,17 @@ package blockchain.midterm;
 
 import java.io.*;
 import java.net.*;	// socket 클래스
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -67,17 +73,23 @@ public class Client {
 	    }
 	 /**
 	  * 트랜잭션 보내는 클라이언트
+	 * @throws NoSuchProviderException 
+	 * @throws IllegalBlockSizeException 
+	 * @throws BadPaddingException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws NoSuchPaddingException 
+	 * @throws InvalidKeyException 
 	  */
-	 public static void dataSendClient() {
+	 public static void dataSendClient(PrivateKey key) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException {
 		 	Socket socket = null;
 		 	BufferedWriter bw = null;
-		 	
+		 	String data = "데이터";
 			try {
 				socket = new Socket("localhost", 9999);
 				
 				bw = new BufferedWriter( new OutputStreamWriter( socket.getOutputStream() ) );
-				
-				bw.write("데이터 \n");
+				data = rsa.encryptRSA(data, key);
+				bw.write(data);
 				bw.flush();
 				
 				System.out.println( "Connection success" );
@@ -120,7 +132,7 @@ public class Client {
 			ServerPublicKey = rsa.readPublicKeyFromPemFile("ServerPublicKey.pem");
 		}
 		Thread.sleep(5000);
-		dataSendClient();
+		dataSendClient(wallet.getPrivateKey());
 	}
 
 }
