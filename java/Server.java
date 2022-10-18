@@ -105,7 +105,9 @@ public class Server {
 					System.out.println( socket.getLocalAddress() + ":" + socket.getLocalPort() + "\tClient connect");
 					br = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 					String data = br.readLine();
-					System.out.println( "data : " + data );
+					System.out.println("암호화 된 데이터 : " + data);
+					data = rsa.decryptRSA(data, key);
+					System.out.println( "복호화 된 데이터 : " + data );
 					
 					block[blockNum] = new Block(blockNum, prevH, 0, new ArrayList());
 					block[blockNum].mine();
@@ -120,7 +122,6 @@ public class Server {
 					if ( socket != null ) try { socket.close(); } catch(IOException e) {}
 				}
 			}
-			
 		} catch (IOException e) {
 			System.out.println( "[에러] : " + e.getMessage() );
 		} finally {
