@@ -14,11 +14,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
 public class Server {
-
 	public static Block[] block = new Block[20];
 	public static Transaction[] t = new Transaction[20];
 	public static Sha256 s = new Sha256();
 	public static Rsa rsa = new Rsa();
+	public static String ClientKey;
 	/**
 	 * 클라이언트와 키교환 하는 메소드
 	 * @return PublicKey
@@ -33,34 +33,23 @@ public class Server {
 		System.out.println("----------------ServerKeyExchange-------------------");
         ServerSocket mServerSocket = null;
         Socket mSocket = null;
-
         BufferedReader mIn = null;    // 들어오는 통로
         PrintWriter mOut = null;  // 나가는 통로
-        
-        String keyname = "";
         try {
             mServerSocket = new ServerSocket(9090);
-            System.out.println("");
-            // 스레드가 멈춰 있고
 
-            // 연결 요청이 들어오면 연결
-            mSocket = mServerSocket.accept();
+            mSocket = mServerSocket.accept();				// 연결 요청이 들어오면 연결
             System.out.println("클라이언트와 연결 됨");
 
-            mIn = new BufferedReader(
-                    new InputStreamReader(mSocket.getInputStream()));
-
+            mIn = new BufferedReader( new InputStreamReader(mSocket.getInputStream()));
             mOut = new PrintWriter(mSocket.getOutputStream());
             
-            keyname = mIn.readLine();
-            // 클라이언트에서 보낸 문자열 출력
+            ClientKey = mIn.readLine();						// 클라이언트에서 보낸 문자열 출력
             System.out.println("클라이언트에서 보낸 : ");
-            System.out.println(keyname);
+            System.out.println(ClientKey);
 
-            // 클라이언트에 문자열 전송
-            mOut.println("ServerPublicKey.pem");
-            mOut.flush();
-
+            mOut.println("ServerPublicKey.pem");			// 클라이언트에 문자열 전송
+            mOut.flush();									// 버퍼 삭제
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -76,9 +65,8 @@ public class Server {
                 e.printStackTrace();
             }
         }
-        Rsa rsa = new Rsa();
         System.out.println("------------------------------------------------------");
-        return rsa.readPublicKeyFromPemFile(keyname);
+        return rsa.readPublicKeyFromPemFile(ClientKey);		// 클라에서 받은 공개키 저장
     }
 	/** 
 	 * 트랜잭션 받을 서버
@@ -156,7 +144,7 @@ public class Server {
     	else {
     		System.out.println("키교환을 이미 하였습니다.");
     		wallet.setFromFile("ServerPrivateKey.pem", "ServerPublicKey.pem");		// 키파일 읽어와 지갑에 저장
-    		ClientpublicKey = rsa.readPublicKeyFromPemFile("ClientPublicKey.pem");	
+    		ClientpublicKey = rsa.readPublicKeyFromPemFile(ClientKey);	
     	}
 		dataReceiveServer(wallet, ClientpublicKey);
 	}
